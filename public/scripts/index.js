@@ -48,6 +48,7 @@ $(document).ready(function() {
    $('#control-panel').on("click", "button", function() {
       var option;
       var title;
+      // Add an item
       if ($(this).text() === "+" && !$(this).attr('id')) {
          getCurrDay();
          title = $(this).siblings('h4').text().toLowerCase();
@@ -61,7 +62,8 @@ $(document).ready(function() {
          } else {
             alert("Item already exists in the itinerary!");
          }
-      } else if ($(this).text() === "x") {
+         // Remove an item
+      } else if ($(this).text() === "x" && $(this).attr('id') !== 'dayRemove') {
          getCurrDay();
          if ($(this).hasClass("itemRemove")) {
             title = $(this).parents('ul').siblings('h4').text().toLowerCase().split(' ')[1];
@@ -70,6 +72,7 @@ $(document).ready(function() {
             target.remove();
             days[currDay - 1][title].splice(days[currDay - 1][title].indexOf(option), 1);
          }
+         // Add a day
       } else if ($(this).attr('id') === 'addDay') {
          getCurrDay();
          var newDay = +$(this).prev().text() + 1;
@@ -80,12 +83,27 @@ $(document).ready(function() {
             activities: [],
             restaurants: []
          });
+         // Switch days
       } else if (buttonChecker($(this))) {
          clearPanel();
          $('.current-day').removeClass('current-day');
          $(this).addClass('current-day');
          getCurrDay();
          populatePanel(currDay);
+         $("#dayValue").text('Day ' + currDay);
+      } 
+      // Remove a day
+      else if ($(this).attr('id') === 'dayRemove') {
+      	console.log('got here');
+      	getCurrDay();
+      	days.splice(currDay-1, 1);
+      	var btnsToChange = $(".current-day").nextAll();
+      	$(".current-day").remove();
+      	$(btnsToChange[0]).addClass('current-day');
+      	for (var i = 0; i < btnsToChange.length-1; i++) {
+      		var currVal = +$(btnsToChange[i]).text();
+      		$(btnsToChange[i]).text(currVal-1);
+      	}
       }
 
    });
