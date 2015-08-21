@@ -179,9 +179,9 @@ $(document).ready(function() {
       else if ($(this).attr('id') === 'dayRemove') {
          console.log('got here');
          getCurrDay();
+         clearMap();
          days.splice(currDay - 1, 1);
          clearPanel();
-         clearMap();
          var btnsToChange = $(".current-day").nextAll();
          $(".current-day").remove();
          $(btnsToChange[0]).addClass('current-day');
