@@ -6,6 +6,7 @@ $(document).ready(function() {
       activities: all_activities,
       restaurants: all_restaurants
    };
+
    var images = {
       hotels: '/images/lodging_0star.png',
       activities: '/images/star-3.png',
@@ -33,7 +34,8 @@ $(document).ready(function() {
             hotels: [],
             activities: [],
             restaurants: [],
-            markers: []
+            markers: [],
+            bounds: new google.maps.LatLngBounds()
          });
       }
    });
@@ -82,10 +84,30 @@ $(document).ready(function() {
       }
    }
 
+   function setBounds (marker) {
+      days[currDay-1].bounds.extend(marker.position);
+      map.fitBounds(days[currDay-1].bounds);
+   }
+
+   function narrowBounds () {
+      if (days[currDay-1].markers.length === 0) {
+         days[currDay-1].bounds = new google.maps.LatLngBounds(myLatlng);
+         map.fitBounds(days[currDay-1].bounds);
+         map.setZoom(13);
+      } else {
+         days[currDay-1].bounds = new google.maps.LatLngBounds();
+         days[currDay-1].markers.forEach(function(el){
+            days[currDay-1].bounds.extend(el[Object.keys(el)[0]].position);
+         });
+         map.fitBounds(days[currDay-1].bounds);
+      }
+   }
+
    function drawLocation(location, opts) {
       if (typeof opts !== 'object') {
          opts = {};
       }
+      opts.animation = google.maps.Animation.DROP;
       opts.position = new google.maps.LatLng(location[0], location[1]);
       opts.map = map;
       var marker = new google.maps.Marker(opts);
@@ -135,6 +157,7 @@ $(document).ready(function() {
             var newObj = {};
             newObj[option] = marker;
             days[currDay-1].markers.push(newObj);
+            setBounds(marker);
          } else {
             alert("Item already exists in the itinerary!");
          }
@@ -149,6 +172,7 @@ $(document).ready(function() {
             target.remove();
             removeMarker(option);
             days[currDay - 1][title].splice(days[currDay - 1][title].indexOf(option), 1);
+            narrowBounds();
          }
       }
       // Add a day
@@ -174,6 +198,7 @@ $(document).ready(function() {
          populatePanel(currDay);
          populateMap();
          $("#dayValue").text('Day ' + currDay);
+         narrowBounds();
       }
       // Remove a day
       else if ($(this).attr('id') === 'dayRemove') {
@@ -192,12 +217,11 @@ $(document).ready(function() {
          getCurrDay();
          populatePanel(currDay);
          populateMap();
+         narrowBounds();
       }
    });
 
    function initialize_gmaps() {
-
-
       // Add the marker to the map
       var marker = new google.maps.Marker({
          position: myLatlng,
